@@ -83,8 +83,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'carto',
         'USER': 'postgres',
-        'PASSWORD': 'CLAVE',
-        'HOST': 'IP',
+        'PASSWORD': 'piscolin',
+        'HOST': '35.224.5.196',
         'PORT': '5432',
     }
 }
