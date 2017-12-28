@@ -1,0 +1,60 @@
+apt-get update
+sudo apt-get upgrade
+sudo apt-get install python-pip python-dev libpq-dev postgresql postgresql-contrib postgis nginx supervisor python-virtualenv git
+git clone https://github.com/davis18/geolocalizacion.git
+cd geolocalizacion
+virtualenv --python=/usr/bin/python3 env
+source env/bin/activate
+pip install --upgrade pip
+pip install django==1.10 gunicorn psycopg2 djangorestframework django-cors-headers
+
+sudo cp /home/davis18/geolocalizacion/config/supervisor.conf /etc/supervisor/conf.d/
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl status
+
+sudo cp /home/davis18/geolocalizacion/config/nginx.conf /etc/nginx/sites-available/
+
+mkdir /home/davis18/logs
+mkdir /home/davis18/geolocalizacion/geolocaliza/static/
+mkdir /home/davis18/geolocalizacion/geolocaliza/static/errors
+mkdir /home/davis18/geolocalizacion/geolocaliza/media/
+nano /home/davis18/geolocalizacion/geolocaliza/static/errors/400.html
+nano /home/davis18/geolocalizacion/geolocaliza/static/errors/500.html
+nano /home/davis18/geolocalizacion/geolocaliza/static/errors/502.html
+nano /home/davis18/geolocalizacion/geolocaliza/static/errors/503.html
+nano /home/davis18/geolocalizacion/geolocaliza/static/errors/504.html
+
+#ADD IP
+nano /etc/nginx/sites-available/nginx.conf
+nano /home/davis18/geolocalizacion/geolocaliza/geolocaliza/settings.py
+
+#static file
+cd /home/davis18/geolocalizacion/geolocaliza/
+python manage.py collectstatic
+
+sudo su -
+ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled
+nginx -t
+systemctl restart nginx
+systemctl status nginx
+
+#Postgresql
+sudo nano /etc/postgresql/9.3/main/pg_hba.conf
+#agregar en IPv4:  host    all             all             0.0.0.0/0               md5
+sudo nano /etc/postgresql/9.3/main/postgresql.conf
+# descomentar: listen_addresses = '*'
+
+sudo /etc/init.d/postgresql restart
+
+sudo su - postgres
+psql
+create user geocarto;
+ALTER USER geocarto WITH PASSWORD 'geocarto';
+ALTER USER postgres WITH PASSWORD 'piscolin';
+create database geocarto;
+\q
+psql geocarto
+create extension postgis;
+\q
+exit
